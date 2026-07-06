@@ -18,7 +18,6 @@ class AuthService:
         user = User(
             first_name=form.first_name,
             last_name=form.last_name,
-            username=form.username,
             email=form.email,
             password=hash_password(form.password)
         )
