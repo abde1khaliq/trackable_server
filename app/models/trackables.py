@@ -11,6 +11,7 @@ class Trackable(Base):
     content_type = Column(String, nullable=False)
     interval_minutes = Column(Integer, nullable=False, default=60)
     last_snapshot = Column(String, nullable=True)
+    status = Column(String, nullable=False, default="active")
 
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     updated_at = Column(DateTime(timezone=True), onupdate=func.now())
