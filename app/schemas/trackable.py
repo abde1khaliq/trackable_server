@@ -1,15 +1,19 @@
 from pydantic import BaseModel, Field
 from datetime import datetime
 
-class TrackableBase(BaseModel):
+class TrackableForm(BaseModel):
+    name: str
     url: str
-    content_type: str
     interval_minutes: int = Field(default=60, ge=1)
+    description: str | None = None
     status: str = Field(default="active")
 
-class TrackableResponse(TrackableBase):
+class TrackableResponse(BaseModel):
     id: int
-    user_id: int
+    name: str
+    url: str
+    interval_minutes: int = Field(default=60, ge=1)
+    description: str | None = None
+    status: str = Field(default="active")
     created_at: datetime
     updated_at: datetime | None = None
-    last_snapshot: str | None = None

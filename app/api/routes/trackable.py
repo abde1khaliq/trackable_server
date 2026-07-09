@@ -4,11 +4,11 @@ from sqlalchemy import select
 from app.database.session import get_db
 from app.models.trackables import Trackable
 from app.api.dependencies import get_current_user
-from app.schemas.trackable import TrackableBase, TrackableResponse
+from app.schemas.trackable import TrackableResponse, TrackableForm
 
 router = APIRouter(prefix="/trackables", tags=["Trackables"])
 
-@router.get("/", response_model=list[TrackableBase])
+@router.get("/", response_model=list[TrackableResponse])
 async def get_trackables(
     db: AsyncSession = Depends(get_db),
     user_id: int = Depends(get_current_user)
@@ -19,7 +19,7 @@ async def get_trackables(
 
 @router.post("/", response_model=TrackableResponse)
 async def create_trackable(
-    trackable: TrackableBase,
+    trackable: TrackableForm,
     db: AsyncSession = Depends(get_db),
     user_id: int = Depends(get_current_user)
 ):

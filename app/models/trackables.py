@@ -7,11 +7,13 @@ class Trackable(Base):
 
     id = Column(Integer, primary_key=True, index=True)
     user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
+
+    name = Column(String, nullable=False)
     url = Column(String, nullable=False, index=True)
-    content_type = Column(String, nullable=False)
     interval_minutes = Column(Integer, nullable=False, default=60)
-    last_snapshot = Column(String, nullable=True)
+    description = Column(String, nullable=True)
     status = Column(String, nullable=False, default="active")
 
+    last_snapshot = Column(String, nullable=True)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     updated_at = Column(DateTime(timezone=True), onupdate=func.now())
