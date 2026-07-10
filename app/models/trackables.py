@@ -13,6 +13,7 @@ class Trackable(Base):
     interval_minutes = Column(Integer, nullable=False, default=60)
     description = Column(String, nullable=True)
     status = Column(String, nullable=False, default="active")
+    tracked_element_class = Column(String, nullable=True)
 
     last_snapshot = Column(String, nullable=True)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
