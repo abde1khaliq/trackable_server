@@ -8,6 +8,7 @@ class Settings(BaseSettings):
     secret_key: str
     algorithm: str
     backend_url: str
+    redis_broker: str
 
     model_config = {
         "env_file": BASE_DIR / ".env",
