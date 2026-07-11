@@ -4,6 +4,7 @@ from datetime import datetime
 
 class SnapshotInfo(BaseModel):
     id: int
+    snapshot_data: str
     snapshot_hash: str
     created_at: datetime
 
