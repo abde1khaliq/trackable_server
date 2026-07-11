@@ -3,7 +3,7 @@ from sqlalchemy import Column, Integer, String, DateTime, ForeignKey
 from sqlalchemy.sql import func
 
 class Trackable(Base):
-    __tablename__ = "trackable"
+    __tablename__ = "trackables"
 
     id = Column(Integer, primary_key=True, index=True)
     user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
@@ -15,6 +15,6 @@ class Trackable(Base):
     status = Column(String, nullable=False, default="active")
     tracked_element_class = Column(String, nullable=True)
 
-    last_snapshot = Column(String, nullable=True)
+    last_snapshot = Column(Integer, ForeignKey("snapshots.id"))
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     updated_at = Column(DateTime(timezone=True), onupdate=func.now())
