@@ -13,7 +13,7 @@ class Trackable(Base):
     interval_minutes = Column(Integer, nullable=False, default=60)
     description = Column(String, nullable=True)
     status = Column(String, nullable=False, default="active")
-    tracked_element_class = Column(String, nullable=True)
+    tracked_element_selector = Column(String, nullable=True)  # renamed
     next_check_at = Column(DateTime(timezone=True))
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     updated_at = Column(DateTime(timezone=True), onupdate=func.now())

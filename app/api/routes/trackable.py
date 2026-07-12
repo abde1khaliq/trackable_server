@@ -33,6 +33,8 @@ async def get_trackables(
 
     return response
 
+from fastapi import HTTPException
+
 @router.post("/")
 async def create_trackable(
     trackable: TrackableForm,
@@ -48,12 +50,19 @@ async def create_trackable(
     db.add(new_trackable)
     await db.flush()
 
-    extracted_html = parse_html(new_trackable.url, new_trackable.tracked_element_class)
+    extracted_content = parse_html(new_trackable.url, new_trackable.tracked_element_selector)
+
+    if extracted_content is None:
+        await db.rollback()
+        raise HTTPException(
+            status_code=422,
+            detail="Selector did not match any element on the page — check the CSS selector and try again",
+        )
 
     new_snapshot = Snapshot(
         trackable_id=new_trackable.id,
-        snapshot_data=extracted_html,
-        snapshot_hash=hashlib.sha256(extracted_html.encode()).hexdigest()
+        snapshot_data=extracted_content,
+        snapshot_hash=hashlib.sha256(extracted_content.encode()).hexdigest(),
     )
 
     db.add(new_snapshot)

@@ -1,10 +1,13 @@
 import hashlib
+import logging
 from datetime import datetime, timedelta
 from sqlalchemy import func, select
 from app.celery import celery_app
 from app.database.sync_session import SyncSessionLocal
 from app.models import Trackable, Snapshot
 from app.utils.parser import parse_html
+
+logger = logging.getLogger(__name__)
 
 
 @celery_app.task
@@ -37,7 +40,20 @@ def check_trackable(trackable_id: int):
             .limit(1)
         ).scalar_one_or_none()
 
-        parsed = parse_html(trackable.url, trackable.tracked_element_class)
+        parsed = parse_html(trackable.url, trackable.tracked_element_selector)
+
+        if parsed is None:
+            logger.warning(
+                "Check failed for trackable %s (%s): selector matched nothing "
+                "or the page could not be fetched",
+                trackable.id,
+                trackable.tracked_element_selector,
+            )
+            # Don't overwrite snapshot_data/hash with None — just skip this check.
+            # Optionally mark the trackable so it surfaces in the UI:
+            # trackable.status = "error"
+            # db.commit()
+            return
 
         if last_snapshot is None or parsed != last_snapshot.snapshot_data:
             new_snapshot = Snapshot(
