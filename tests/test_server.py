@@ -39,7 +39,6 @@ class Handler(BaseHTTPRequestHandler):
         self.wfile.write(body)
 
     def log_message(self, format, *args):
-        # quiet default request logging, comment out if you want to see hits
         pass
 
 
