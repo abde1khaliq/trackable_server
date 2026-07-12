@@ -1,7 +1,7 @@
 # Trackable
 
-Trackable watches specific elements on web pages (a price, a stock status, a
-comment count — anything CSS can select) and records a snapshot every time
+Trackable watches specific elements on static non-js rendered web pages (a price, a stock status, a
+comment count, anything CSS can select) and records a snapshot every time
 their content changes. It's a small clone of tools like changedetection.io,
 built as a learning project around FastAPI, Celery, and Redis.
 
@@ -37,11 +37,9 @@ built as a learning project around FastAPI, Celery, and Redis.
 
 ## Prerequisites
 
-- [Docker](https://docs.docker.com/get-docker/) and Docker Compose (bundled
-  with Docker Desktop, or `docker-compose-plugin` on Linux)
+- [Docker](https://docs.docker.com/get-docker/) and Docker Compose
 
-That's it — Python, Postgres, and Redis all run inside containers, nothing
-needs to be installed locally.
+Python, Postgres, and Redis all run inside containers.
 
 ## Quickstart
 
@@ -50,24 +48,6 @@ git clone https://github.com/abde1khaliq/trackable_server.git
 cd trackable_server
 cp .env.example .env
 docker compose up --build -d
-```
-
-That's the one command. It builds the app image, then starts:
-
-| Service     | What it does                                      | Exposed on            |
-|-------------|----------------------------------------------------|------------------------|
-| `db`        | PostgreSQL 16                                       | internal only          |
-| `redis`     | Redis 7 (Celery broker)                             | internal only          |
-| `api`       | FastAPI app (runs migrations on startup, then serves)| http://localhost:8000 |
-| `worker`    | Celery worker — runs the actual page checks         | —                       |
-| `beat`      | Celery beat — dispatches due checks every 10s       | —                       |
-| `test-page` | Optional demo page with elements that change on a schedule | http://localhost:8080 |
-
-Check everything came up healthy:
-
-```bash
-docker compose ps
-docker compose logs -f api worker beat
 ```
 
 Visit `http://localhost:8000` for a placeholder landing page (confirms the
@@ -83,20 +63,19 @@ docker compose down -v       # stop containers AND wipe the database
 
 ## Configuration
 
-All configuration lives in `.env` (copy `.env.example` to get started). The
-important ones:
+All configuration lives in `.env` (copy `.env.example` to get started).
 
 | Variable        | Purpose                                                   |
 |-----------------|------------------------------------------------------------|
 | `DATABASE_URL`  | Async Postgres connection string (`+asyncpg`), used by the API and Alembic |
+| `BACKEND_URL`   | This is just the backend url |
 | `SECRET_KEY`    | Signs JWTs — set this to a real random string, especially outside local dev |
 | `ALGORITHM`     | JWT signing algorithm (`HS256`)                             |
 | `REDIS_BROKER`  | Redis connection string Celery uses as its broker          |
-| `POSTGRES_*`    | Credentials the `db` container is initialized with — keep these in sync with `DATABASE_URL` |
 
 The Celery worker connects to Postgres with the same `DATABASE_URL`, but
 swapped to the sync `psycopg` driver internally (see
-`app/database/sync_session.py`) — you don't need a second URL for that.
+`app/database/sync_session.py`).
 
 ## Using the API
 
@@ -124,7 +103,7 @@ curl -X POST http://localhost:8000/auth/login \
   -d '{"email": "ada@example.com", "password": "a-real-password"}'
 ```
 
-This returns an `access_token` — export it for convenience:
+This returns an `access_token`:
 
 ```bash
 export TOKEN="paste-the-access-token-here"
@@ -133,7 +112,7 @@ export TOKEN="paste-the-access-token-here"
 **3. Create a trackable**
 
 `tracked_element_selector` takes a real CSS selector (not just a bare class
-name) — this matters as soon as more than one element on the page shares a
+name). This matters as soon as more than one element on the page shares a
 class. See the built-in test page below for examples of disambiguating with
 `[data-*]` attributes or `:nth-of-type`.
 
@@ -178,7 +157,7 @@ website:
 | `.price_color:nth-of-type(2)`         | Same disambiguation, via position instead   |
 
 Create a few trackables against different selectors and watch
-`docker compose logs -f worker` — you'll see new snapshots appear for the
+`docker compose logs -f worker`, you'll see new snapshots appear for the
 ones that change and nothing for `.tracked-static`, which is the signal that
 the diffing logic itself is working correctly rather than falsely flagging
 every check as a change.
@@ -186,7 +165,7 @@ every check as a change.
 ## Database migrations
 
 Migrations run automatically on container startup (`alembic upgrade head`,
-in `entrypoint.sh`) — you don't need to run them by hand for normal use.
+in `entrypoint.sh`) so you don't need to run them by hand for normal use.
 
 If you add a new model field and need to generate a new migration:
 
